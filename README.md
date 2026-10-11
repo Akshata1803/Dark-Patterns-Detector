@@ -95,3 +95,16 @@ This extension was developed as a **Final Year (Capstone) project** for the Bach
 ## 📄 License
 
 This project is licensed under the [MIT License](LICENSE) - see the LICENSE file for details.
+
+## New features (added by our group)
+
+### Export Report
+A new "Export Report" button in the popup downloads the dark patterns detected on the current page as a JSON file. Each entry has the pattern name, the matching text and an explanation.
+
+### Pattern Count Badge
+After a scan, the extension icon on the toolbar shows the number of detected dark patterns. The badge is cleared when no patterns are found.
+
+## How to contribute
+1. Fork this repository and create a feature branch (for example feature/my-change).
+2. Make your change, commit it and push the branch to your fork.
+3. Open a Pull Request, ask a teammate to review it, and merge it after approval.
