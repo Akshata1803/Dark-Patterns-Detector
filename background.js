@@ -47,7 +47,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     console.log('Background script received analyze request');
     analyzeWithGemini(request.content)
       .then(response => {
-        console.log('Gemini analysis complete, detected patterns:', response.darkPatterns.length);
+        const count = response.darkPatterns ? response.darkPatterns.length : 0;
+        console.log('Gemini analysis complete, detected patterns:', count);
+
+        // Update extension icon badge with detected patterns count
+        updateBadge(count);
+
         sendResponse(response);
       })
       .catch(error => {
@@ -192,5 +197,18 @@ function parseGeminiResponse(response) {
   } catch (error) {
     console.error('Error parsing Gemini response:', error);
     return [];
+  }
+}
+
+// Function to update toolbar icon badge with pattern count
+function updateBadge(count) {
+  if (count > 0) {
+    // Show pattern count on the icon badge
+    chrome.action.setBadgeText({ text: count.toString() });
+    // Set badge background color (red for alert)
+    chrome.action.setBadgeBackgroundColor({ color: '#d63031' });
+  } else {
+    // Clear badge when 0 patterns detected
+    chrome.action.setBadgeText({ text: '' });
   }
 } 
