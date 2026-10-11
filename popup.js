@@ -17,6 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const patternsList = document.getElementById('patterns-list');
   const patternCount = document.getElementById('pattern-count');
   const highlightAllButton = document.getElementById('highlight-all');
+  const exportReportButton = document.getElementById('export-report-button');
   const backButton = document.getElementById('back-button');
   const feedbackButton = document.getElementById('feedback-button');
   const feedbackView = document.getElementById('feedback-view');
@@ -40,6 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
   chrome.storage.local.get(['darkPatterns', 'pageUrl'], (data) => {
     // If we have results for the current page, show them
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      if (!tabs || !tabs[0]) return;
       currentUrl = tabs[0].url;
 
       if (data.darkPatterns && data.pageUrl === currentUrl) {
@@ -57,6 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Get the current tab
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      if (!tabs || !tabs[0]) return;
       const currentTab = tabs[0];
       currentUrl = currentTab.url;
 
@@ -102,7 +105,7 @@ document.addEventListener('DOMContentLoaded', () => {
         content: response.content
       },
       (result) => {
-        if (chrome.runtime.lastError || result.error) {
+        if (chrome.runtime.lastError || !result || result.error) {
           console.error('Error from background script:', result?.error || chrome.runtime.lastError);
           showError("Failed to analyze page. Please try again.");
           return;
@@ -282,6 +285,33 @@ document.addEventListener('DOMContentLoaded', () => {
     scanButton.style.display = 'block';
     loadingSpinner.style.display = 'none';
   });
+
+  // Export Report button handler
+  if (exportReportButton) {
+    exportReportButton.addEventListener('click', () => {
+      // Format detected dark patterns (pattern name, text, explanation)
+      const reportData = (detectedPatterns || []).map(pattern => ({
+        patternName: pattern.type || '',
+        text: pattern.text || '',
+        explanation: pattern.description || ''
+      }));
+
+      // Create JSON file blob and object URL
+      const blob = new Blob([JSON.stringify(reportData, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+
+      // Download report as a .json file using chrome.downloads
+      chrome.downloads.download({
+        url: url,
+        filename: 'dark-patterns-report.json'
+      }, (downloadId) => {
+        if (chrome.runtime.lastError) {
+          console.error('Export download failed:', chrome.runtime.lastError);
+          showError('Failed to download report.');
+        }
+      });
+    });
+  }
 
   // Feedback button handler
   feedbackButton.addEventListener('click', () => {
