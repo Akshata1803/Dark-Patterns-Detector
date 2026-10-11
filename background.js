@@ -119,7 +119,7 @@ ${content}`;
 
     console.log('Sending request to Gemini API');
     
-    const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + CONFIG.GEMINI_API_KEY, {
+    const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=' + CONFIG.GEMINI_API_KEY, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -165,8 +165,9 @@ ${content}`;
 
 function parseGeminiResponse(response) {
   try {
-    // Extract the text content from the Gemini response
-    const text = response.candidates[0].content.parts[0].text;
+    // Extract the text content from the Gemini response parts
+    const parts = response?.candidates?.[0]?.content?.parts || [];
+    const text = parts.map(p => p.text || '').join('');
     console.log('Processing Gemini response text');
 
     // Try to clean and parse the response
